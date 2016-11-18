@@ -9,7 +9,7 @@ end
 
 desc 'Run the server'
 task :server => :build do
-  sh 'puma config.ru'
+  sh "puma --bind tcp://0.0.0.0:#{ENV['PORT']} config.ru"
 end
 
 desc 'Run a dev server (that automatically refreshes)'
