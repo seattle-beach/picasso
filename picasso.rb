@@ -16,7 +16,7 @@ get '/' do
   if Faye::WebSocket.websocket?(request.env)
     handle_websocket(request)
   else
-    'hello world'
+    erb :index
   end
 end
 
@@ -74,6 +74,14 @@ __END__
 </body>
 
 </html>
+
+@@ index
+<div id="picasso">Hello World</div>
+<script src="picasso.js"></script>
+<script>
+    var node = document.getElementById('picasso');
+    var app = Elm.Main.embed(node);
+</script>
 
 @@ login
 <script type="text/javascript">
