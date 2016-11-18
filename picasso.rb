@@ -13,13 +13,14 @@ set :server, :puma
 get '/' do
   return redirect('/login') unless session[:user]
 
-  'hello world'
+  if Faye::WebSocket.websocket?(request.env)
+    handle_websocket(request)
+  else
+    'hello world'
+  end
 end
 
-get '/ws' do
-  return redirect('/login') unless session[:user]
-  halt 403 unless Faye::WebSocket.websocket?(request.env)
-
+def handle_websocket(request)
   ws = Faye::WebSocket.new(request.env)
 
   ws.on(:open) do |event|
