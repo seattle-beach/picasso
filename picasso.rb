@@ -23,7 +23,8 @@ end
 ### Auth ###
 
 get '/login' do
-  erb :login
+  base_url = request.base_url
+  erb :login, locals: { base_url: base_url }
 end
 
 post '/login' do
@@ -112,7 +113,7 @@ __END__
         xhr.open('POST', '/login');
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
-            console.log('Signed in as: ' + xhr.responseText);
+            window.location = "<%= base_url %>";
         };
         xhr.send('id_token=' + id_token);
     }
