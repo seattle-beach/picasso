@@ -1,6 +1,7 @@
 require 'json'
 require 'open-uri'
 
+require 'faye/websocket'
 require 'sinatra'
 
 enable :sessions
@@ -13,6 +14,27 @@ get '/' do
   return redirect('/login') unless session[:user]
 
   'hello world'
+end
+
+get '/ws' do
+  return redirect('/login') unless session[:user]
+  halt 403 unless Faye::WebSocket.websocket?(request.env)
+
+  ws = Faye::WebSocket.new(request.env)
+
+  ws.on(:open) do |event|
+    puts 'On Open'
+  end
+
+  ws.on(:message) do |msg|
+    ws.send(msg.data.reverse)  # Reverse and reply
+  end
+
+  ws.on(:close) do |event|
+    puts 'On Close'
+  end
+
+  ws.rack_response
 end
 
 get '/login' do
