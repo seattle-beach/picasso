@@ -20,23 +20,7 @@ get '/' do
   end
 end
 
-def handle_websocket(request)
-  ws = Faye::WebSocket.new(request.env)
-
-  ws.on(:open) do |event|
-    puts 'On Open'
-  end
-
-  ws.on(:message) do |msg|
-    ws.send(msg.data.reverse)  # Reverse and reply
-  end
-
-  ws.on(:close) do |event|
-    puts 'On Close'
-  end
-
-  ws.rack_response
-end
+### Auth ###
 
 get '/login' do
   erb :login
@@ -55,6 +39,41 @@ post '/login' do
   session[:user] = user
 
   user[:name]
+end
+
+### Business Logic ###
+
+MESSAGES = []
+SOCKETS = Set.new
+
+def handle_websocket(request)
+  ws = Faye::WebSocket.new(request.env)
+
+  ws.on(:open) do
+    MESSAGES.each do |msg|
+      ws.send(msg)
+    end
+    SOCKETS << ws
+  end
+
+  ws.on(:message) do |msg|
+    handle_message(msg.data)
+  end
+
+  ws.on(:close) do
+    SOCKETS.delete(ws)
+  end
+
+  ws.rack_response
+end
+
+def handle_message(msg)
+  return if msg.empty?
+
+  MESSAGES << "#{session[:user][:name]}: #{msg}"
+  SOCKETS.each do |socket|
+    socket.send(MESSAGES.last)
+  end
 end
 
 __END__
