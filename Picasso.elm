@@ -47,16 +47,16 @@ type Msg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg {wsURL, input, messages} =
+update msg model =
   case msg of
     Input newInput ->
-      (Model wsURL newInput messages, Cmd.none)
+      ({ model | input=newInput }, Cmd.none)
 
     Send ->
-      (Model wsURL "" messages, WebSocket.send wsURL input)
+      ({ model | input="" }, WebSocket.send model.wsURL model.input)
 
     NewMessage str ->
-      (Model wsURL input (str :: messages), Cmd.none)
+      ({ model | messages=(str :: model.messages)}, Cmd.none)
 
 
 
