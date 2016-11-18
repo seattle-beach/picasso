@@ -9,12 +9,12 @@ end
 
 desc 'Run the server'
 task :server => :build do
-  sh 'ruby picasso.rb'
+  sh 'puma config.ru'
 end
 
 desc 'Run a dev server (that automatically refreshes)'
 task :dev do
-  sh 'rerun --pattern "**/*.{rb,elm}" ruby picasso.rb'
+  sh 'rerun --pattern "**/*.{rb,elm}" rake server'
 end
 
 task :build => 'public/picasso.js'
@@ -25,3 +25,9 @@ file 'public/picasso.js' => 'Picasso.elm' do |t|
   sh "elm-make #{input} --output=#{output}"
 end
 CLOBBER.include('public/picasso.js')
+
+# This is here so rerun can properly kill
+# Puma before restarting the dev server.
+Signal.trap('TERM') do
+  sh 'pkill -INT -f puma'
+end
