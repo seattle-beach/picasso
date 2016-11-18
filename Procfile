@@ -1,1 +1,1 @@
-web: ruby picasso.rb
+web: rake server

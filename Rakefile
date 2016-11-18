@@ -7,9 +7,14 @@ task :push => :build do
   sh 'cf push'
 end
 
-desc 'Run the dev server'
+desc 'Run the server'
 task :server => :build do
-  sh 'rerun ruby picasso.rb'
+  sh 'ruby picasso.rb'
+end
+
+desc 'Run a dev server (that automatically refreshes)'
+task :dev do
+  sh 'rerun rake server'
 end
 
 task :build => 'public/picasso.js'
