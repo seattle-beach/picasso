@@ -76,8 +76,8 @@ view : Model -> Html Msg
 view model =
   div []
     [ input [onInput Input, value model.input] []
-    , button [onClick Send] [text "Send Text"]
-    , div [] (List.map viewMessage (List.reverse model.messages))
+    , button [onClick Send] [text "Send"]
+    , div [] (List.map viewMessage model.messages)
     ]
 
 
