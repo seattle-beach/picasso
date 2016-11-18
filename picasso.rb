@@ -15,8 +15,9 @@ get '/' do
   if Faye::WebSocket.websocket?(request.env)
     handle_websocket(request)
   else
+    base_url = request.base_url
     ws_url = ENV['WS_URL']
-    erb :index, locals: { ws_url: ws_url }
+    erb :index, locals: { base_url: base_url, ws_url: ws_url }
   end
 end
 
@@ -40,6 +41,11 @@ post '/login' do
   session[:user] = user
 
   user[:name]
+end
+
+get '/logout' do
+  session.delete(:user)
+  redirect '/'
 end
 
 ### Business Logic ###
@@ -91,6 +97,7 @@ __END__
 
 <body>
     <%= yield %>
+    <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
 </body>
 
 </html>
@@ -103,6 +110,21 @@ __END__
     var app = Elm.Main.embed(node, {
       wsURL: "<%= ws_url %>"
     });
+</script>
+<a href="#" onclick="signOut();">Sign out</a>
+<script>
+  function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      window.location = "<%= base_url %>/logout";
+    });
+  }
+
+  function onLoad() {
+    gapi.load('auth2', function() {
+      gapi.auth2.init();
+    });
+  }
 </script>
 
 @@ login
@@ -119,4 +141,3 @@ __END__
     }
 </script>
 <div class="g-signin2" data-onsuccess="onSignIn"></div>
-<script src="https://apis.google.com/js/platform.js" async defer></script>
