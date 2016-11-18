@@ -1,14 +1,18 @@
 require 'rake/clean'
 
-task :default => 'public/picasso.js'
+task :default => :build
 
-task :push => 'public/picasso.js' do
+desc 'Push to CF'
+task :push => :build do
   sh 'cf push'
 end
 
-task :server => 'public/picasso.js' do
+desc 'Run the dev server'
+task :server => :build do
   sh 'rerun ruby picasso.rb'
 end
+
+task :build => 'public/picasso.js'
 
 file 'public/picasso.js' => 'Picasso.elm' do |t|
   input = t.prerequisites[0]
