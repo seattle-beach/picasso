@@ -3,8 +3,12 @@ require 'open-uri'
 
 require 'sinatra'
 
+enable :sessions
+
 get '/' do
-  'hello world!'
+  return redirect('/login') unless session[:user]
+
+  'hello world'
 end
 
 get '/login' do
