@@ -9,7 +9,7 @@ import WebSocket
 
 
 main =
-  Html.program
+  Html.programWithFlags
     { init = init
     , view = view
     , update = update
@@ -17,24 +17,23 @@ main =
     }
 
 
-echoServer : String
-echoServer =
-  "wss://beach-chat.cfapps.io:4443"
-
-
+type alias Flags =
+  { wsURL : String
+  }
 
 -- MODEL
 
 
 type alias Model =
-  { input : String
+  { wsURL: String
+  , input : String
   , messages : List String
   }
 
 
-init : (Model, Cmd Msg)
-init =
-  (Model "" [], Cmd.none)
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+  (Model flags.wsURL "" [], Cmd.none)
 
 
 
@@ -48,16 +47,16 @@ type Msg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg {input, messages} =
+update msg {wsURL, input, messages} =
   case msg of
     Input newInput ->
-      (Model newInput messages, Cmd.none)
+      (Model wsURL newInput messages, Cmd.none)
 
     Send ->
-      (Model "" messages, WebSocket.send echoServer input)
+      (Model wsURL "" messages, WebSocket.send wsURL input)
 
     NewMessage str ->
-      (Model input (str :: messages), Cmd.none)
+      (Model wsURL input (str :: messages), Cmd.none)
 
 
 
@@ -66,7 +65,7 @@ update msg {input, messages} =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  WebSocket.listen echoServer NewMessage
+  WebSocket.listen model.wsURL NewMessage
 
 
 

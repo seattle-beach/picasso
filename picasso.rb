@@ -15,7 +15,8 @@ get '/' do
   if Faye::WebSocket.websocket?(request.env)
     handle_websocket(request)
   else
-    erb :index
+    ws_url = ENV['WS_URL']
+    erb :index, locals: { ws_url: ws_url }
   end
 end
 
@@ -79,7 +80,9 @@ __END__
 <script src="picasso.js"></script>
 <script>
     var node = document.getElementById('picasso');
-    var app = Elm.Main.embed(node);
+    var app = Elm.Main.embed(node, {
+      wsURL: "<%= ws_url %>"
+    });
 </script>
 
 @@ login
