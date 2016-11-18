@@ -14,7 +14,7 @@ end
 
 desc 'Run a dev server (that automatically refreshes)'
 task :dev do
-  sh 'rerun rake server'
+  sh 'rerun --pattern "**/*.{rb,elm}" ruby picasso.rb'
 end
 
 task :build => 'public/picasso.js'
