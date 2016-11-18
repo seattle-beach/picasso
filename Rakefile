@@ -2,6 +2,10 @@ require 'rake/clean'
 
 task :default => 'public/picasso.js'
 
+task :push => 'public/picasso.js' do
+  sh 'cf push'
+end
+
 file 'public/picasso.js' => 'Picasso.elm' do |t|
   input = t.prerequisites[0]
   output = t.name

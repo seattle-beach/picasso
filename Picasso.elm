@@ -19,7 +19,7 @@ main =
 
 echoServer : String
 echoServer =
-  "ws://localhost:9292/"
+  "wss://beach-chat.cfapps.io:4443"
 
 
 

@@ -1,0 +1,5 @@
+---
+applications:
+- name: beach-chat
+  buildpack: ruby_buildpack
+  memory: 256M

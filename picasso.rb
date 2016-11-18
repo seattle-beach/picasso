@@ -7,7 +7,6 @@ require 'sinatra'
 enable :sessions
 set :session_secret, 'omg'
 
-set :port, 9292
 set :server, :puma
 
 get '/' do
