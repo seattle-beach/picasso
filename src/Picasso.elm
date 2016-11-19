@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import WebSocket
+import Json.Decode as Json
 
 
 
@@ -44,6 +45,7 @@ type Msg
   = Input String
   | Send
   | NewMessage String
+  | KeyDown Int
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -57,6 +59,12 @@ update msg model =
 
     NewMessage str ->
       ({ model | messages=(str :: model.messages)}, Cmd.none)
+
+    KeyDown key ->
+      if key == 13 then
+        ({ model | input="" }, WebSocket.send model.wsURL model.input)
+      else
+        (model, Cmd.none)
 
 
 
@@ -75,7 +83,7 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   div []
-    [ input [onInput Input, value model.input] []
+    [ input [onKeyDown KeyDown, onInput Input, value model.input] []
     , button [onClick Send] [text "Send"]
     , div [] (List.map viewMessage model.messages)
     ]
@@ -84,3 +92,8 @@ view model =
 viewMessage : String -> Html msg
 viewMessage msg =
   div [] [ text msg ]
+
+
+onKeyDown : (Int -> msg) -> Attribute msg
+onKeyDown tagger =
+  on "keydown" (Json.map tagger keyCode)
