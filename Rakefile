@@ -1,4 +1,5 @@
 require 'rake/clean'
+require 'rake/testtask'
 
 task :default => :build
 
@@ -25,6 +26,12 @@ file 'public/picasso.js' => 'src/Picasso.elm' do |t|
   sh "elm-make #{input} --output=#{output}"
 end
 CLOBBER.include('public/picasso.js')
+
+Rake::TestTask.new do |t|
+  t.libs << 'lib'
+  t.test_files = FileList['test/test_*.rb']
+  t.verbose = true
+end
 
 # This is here so rerun can properly kill
 # Puma before restarting the dev server.
