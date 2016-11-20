@@ -2,86 +2,92 @@ require 'json'
 require 'open-uri'
 
 require 'faye/websocket'
-require 'sinatra'
+require 'sinatra/base'
 
-set :root, File.expand_path('../..', __FILE__)
+module Picasso
+  class Web < Sinatra::Application
+    set :root, File.expand_path('../..', __FILE__)
 
-enable :sessions
-set :session_secret, 'omg'
+    enable :sessions
+    set :session_secret, 'omg'
 
-set :server, :puma
+    enable :inline_templates
 
-get '/' do
-  return redirect('/login') unless session[:user]
+    set :server, :puma
 
-  if Faye::WebSocket.websocket?(request.env)
-    handle_websocket(request)
-  else
-    base_url = request.base_url
-    ws_url = ENV['WS_URL']
-    erb :index, locals: { base_url: base_url, ws_url: ws_url }
-  end
-end
+    get '/' do
+      return redirect('/login') unless session[:user]
 
-### Auth ###
-
-get '/login' do
-  base_url = request.base_url
-  erb :login, locals: { base_url: base_url }
-end
-
-post '/login' do
-  id_token = params[:id_token]
-
-  url = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=#{id_token}"
-  resp = open(url)
-  body = JSON.load(resp)
-
-  halt 403 if body['aud'] != ENV['CLIENT_ID']
-
-  user = {id: body['sub'], name: body['name'] }
-  session[:user] = user
-
-  user[:name]
-end
-
-get '/logout' do
-  session.delete(:user)
-  redirect '/'
-end
-
-### Business Logic ###
-
-MESSAGES = []
-SOCKETS = Set.new
-
-def handle_websocket(request)
-  ws = Faye::WebSocket.new(request.env)
-
-  ws.on(:open) do
-    MESSAGES.each do |msg|
-      ws.send(msg)
+      if Faye::WebSocket.websocket?(request.env)
+        handle_websocket(request)
+      else
+        base_url = request.base_url
+        ws_url = ENV['WS_URL']
+        erb :index, locals: { base_url: base_url, ws_url: ws_url }
+      end
     end
-    SOCKETS << ws
-  end
 
-  ws.on(:message) do |msg|
-    handle_message(msg.data)
-  end
+    ### Auth ###
 
-  ws.on(:close) do
-    SOCKETS.delete(ws)
-  end
+    get '/login' do
+      base_url = request.base_url
+      erb :login, locals: { base_url: base_url }
+    end
 
-  ws.rack_response
-end
+    post '/login' do
+      id_token = params[:id_token]
 
-def handle_message(msg)
-  return if msg.empty?
+      url = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=#{id_token}"
+      resp = open(url)
+      body = JSON.load(resp)
 
-  MESSAGES << "#{session[:user][:name]}: #{msg}"
-  SOCKETS.each do |socket|
-    socket.send(MESSAGES.last)
+      halt 403 if body['aud'] != ENV['CLIENT_ID']
+
+      user = {id: body['sub'], name: body['name'] }
+      session[:user] = user
+
+      user[:name]
+    end
+
+    get '/logout' do
+      session.delete(:user)
+      redirect '/'
+    end
+
+    ### Business Logic ###
+
+    MESSAGES = []
+    SOCKETS = Set.new
+
+    def handle_websocket(request)
+      ws = Faye::WebSocket.new(request.env)
+
+      ws.on(:open) do
+        MESSAGES.each do |msg|
+          ws.send(msg)
+        end
+        SOCKETS << ws
+      end
+
+      ws.on(:message) do |msg|
+        handle_message(msg.data)
+      end
+
+      ws.on(:close) do
+        SOCKETS.delete(ws)
+      end
+
+      ws.rack_response
+    end
+
+    def handle_message(msg)
+      return if msg.empty?
+
+      MESSAGES << "#{session[:user][:name]}: #{msg}"
+      SOCKETS.each do |socket|
+        socket.send(MESSAGES.last)
+      end
+    end
   end
 end
 
