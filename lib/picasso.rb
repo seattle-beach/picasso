@@ -4,6 +4,8 @@ require 'open-uri'
 require 'faye/websocket'
 require 'sinatra'
 
+set :root, File.expand_path('../..', __FILE__)
+
 enable :sessions
 set :session_secret, 'omg'
 
