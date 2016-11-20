@@ -6,7 +6,7 @@ require 'sinatra/base'
 
 module Picasso
   class Web < Sinatra::Application
-    set :root, File.expand_path('../..', __FILE__)
+    set :root, File.expand_path('../../..', __FILE__)
 
     enable :sessions
     set :session_secret, 'omg'
