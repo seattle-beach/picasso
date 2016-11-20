@@ -19,7 +19,7 @@ end
 
 task :build => 'public/picasso.js'
 
-file 'public/picasso.js' => 'Picasso.elm' do |t|
+file 'public/picasso.js' => 'src/Picasso.elm' do |t|
   input = t.prerequisites[0]
   output = t.name
   sh "elm-make #{input} --output=#{output}"
