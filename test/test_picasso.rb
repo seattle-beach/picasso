@@ -20,5 +20,11 @@ class TestDraft < Test
 
     assert_equal 1, @draft.players.count
     assert_equal @draft, @alice.draft
+    assert_equal :not_ready, @alice.state
+
+    @bob.join(@draft)
+    assert_equal 2, @draft.players.count
+    assert_equal @draft, @bob.draft
+    assert_equal :not_ready, @alice.state
   end
 end

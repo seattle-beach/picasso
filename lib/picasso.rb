@@ -10,11 +10,12 @@ module Picasso
   end
 
   class Player
-    attr_reader :draft
+    attr_reader *%i[ state draft ]
 
     def join(draft)
       draft.players << self
       @draft = draft
+      @state = :not_ready
     end
   end
 end
