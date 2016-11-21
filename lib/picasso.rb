@@ -1,21 +1,35 @@
 require_relative 'picasso/web'
 
 module Picasso
-  class Draft
-    attr_reader *%i[ state players ]
+  NUM_PACKS = 3
+  PACK_SIZE = 15
 
-    def initialize
-      @state, @players = :ready, []
+  class NotEnoughPacks < StandardError; end
+
+  class Draft
+    attr_reader *%i[ packs pack players ]
+
+    def initialize(packs:)
+      @packs, @pack, @players = packs.shuffle, 0, []
     end
   end
 
   class Player
-    attr_reader *%i[ state draft ]
+    attr_reader *%i[ draft packs cards ]
+
+    def initialize
+      @packs, @cards = [], []
+    end
 
     def join(draft)
       draft.players << self
       @draft = draft
-      @state = :not_ready
+    end
+
+    def ready!
+      raise NotEnoughPacks if draft.packs.count < NUM_PACKS
+
+      3.times { @packs << @draft.packs.shift }
     end
   end
 end
