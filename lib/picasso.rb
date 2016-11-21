@@ -8,4 +8,13 @@ module Picasso
       @state, @players = :ready, []
     end
   end
+
+  class Player
+    attr_reader :draft
+
+    def join(draft)
+      draft.players << self
+      @draft = draft
+    end
+  end
 end
