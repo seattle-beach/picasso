@@ -17,19 +17,18 @@ module Picasso
   class Player
     attr_reader *%i[ draft packs cards ]
 
-    def initialize
-      @packs, @cards = [], []
-    end
+    def join(draft: draft)
+      raise NotEnoughPacks if draft.packs.count < NUM_PACKS
 
-    def join(draft)
       draft.players << self
       @draft = draft
+      @packs = []
+      NUM_PACKS.times do
+        @packs << draft.packs.shift
+      end
     end
 
     def ready!
-      raise NotEnoughPacks if draft.packs.count < NUM_PACKS
-
-      3.times { @packs << @draft.packs.shift }
     end
   end
 end
